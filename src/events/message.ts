@@ -1,24 +1,24 @@
 import "dotenv/config";
-import { Client } from "whatsapp-web.js";
+
 import fs from "fs";
+import {Client, Message} from "whatsapp-web.js";
 
-const prefix = process.env.PREFIX!;
+const prefix: string = process.env.PREFIX!;
 
-const message = (client: Client) => {
-    client.on("message", async (message) => {
+const message = (client: Client): void => {
+    client.on("message", async (message: Message) => {
         const command = message.body.split(" ")[0].replace(prefix, "");
-        const args = message.body.split(" ").slice(1);
+        // const args = message.body.split(" ").slice(1);
         
-        let listCommands: {
+        const listCommands: {
             name: string;
             description: string;
             aliases: string[] | undefined;
         }[] = [];
 
-        const commandFiles = fs.readdirSync("./src/commands").filter((file) => file.endsWith(".ts"));
+        const commandFiles = fs.readdirSync("./src/commands");
         for (const file of commandFiles) {
-            const fileName = file.split(".")[0] + ".js";
-            const commandModule = await import(`../commands/${fileName}`);
+            const commandModule = await import(`../commands/${file}`);
             const commands = commandModule.default;
 
             listCommands.push({
@@ -29,11 +29,16 @@ const message = (client: Client) => {
 
 
             if (message.body.startsWith(prefix)) {
-                if (commands.name === command) {
-                    commands.run(message, args);
+                if (commands.name.split(' ').length > 1) {
+                    const splittedData: string[] = commands.name.split(' ');
+                    const newData: string[] = splittedData.slice(1)
+                    const stringifiedNewData: string = newData.join(' ');
+                    commands.run(stringifiedNewData, client);
+                } else if (commands.name === command) {
+                    commands.run(message, client);
                 }
             } else if (commands.aliases?.includes(command)) {
-                commands.run(message, args);
+                commands.run(message);
             }
         }
 
@@ -42,7 +47,7 @@ const message = (client: Client) => {
             listCommands.forEach((command) => {
                 text += `\n${prefix}${command.name}: ${command.description}`;
             });
-            message.reply(text);
+            await message.reply(text);
         }
     });
 }

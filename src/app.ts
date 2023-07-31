@@ -1,14 +1,14 @@
 import "dotenv/config";
 
-import Bard, { askAI } from "bard-ai";
+import Bard from "bard-ai";
 import qrcode from "qrcode-terminal";
-import { Client } from "whatsapp-web.js";
-import fs from "fs";
+import Whatsapp from "whatsapp-web.js";
+const {Client, LocalAuth} = Whatsapp;
 
-import { listCommands } from "./config.js";
 import message from "./events/message.js";
 
 const client = new Client({
+  authStrategy: new LocalAuth(),
   puppeteer: {
     args: ["--no-sandbox"],
   },
@@ -24,13 +24,12 @@ client.on("ready", () => {
 
 const init = async () => {
   await Bard.init(process.env.BARD_COOKIE!);
-  client.initialize();
+  await client.initialize()
 };
 
 init();
 
 message(client);
-
 // client.on("message", async (message) => {
 //   const commandFiles = fs.readdirSync("./src/commands")
 //     .filter((file) => file.endsWith(".ts"));
@@ -59,7 +58,7 @@ message(client);
 //       const res = await req.json();
 //       if (res.cod == 200) {
 //         message.reply(
-//           `*Cuaca ${res.name}*\n- Lat: ${res.coord.lat}\n- Lon: ${res.coord.lon}\n- Cuaca: ${res.weather[0].main}/${res.weather[0].description}\n- Temperatur: ${res.main.temp}\n- Kecepatan Angin: ${res.wind.speed}`
+//           `*WeatherResponse ${res.name}*\n- Lat: ${res.coord.lat}\n- Lon: ${res.coord.lon}\n- WeatherResponse: ${res.weather[0].main}/${res.weather[0].description}\n- Temperatur: ${res.main.temp}\n- Kecepatan Angin: ${res.wind.speed}`
 //         );
 //       } else {
 //         message.reply(`Gagal mendapatkan cuaca`);
