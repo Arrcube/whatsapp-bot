@@ -8,7 +8,6 @@ const prefix: string = process.env.PREFIX!;
 const message = (client: Client): void => {
     client.on("message", async (message: Message) => {
         const command = message.body.split(" ")[0].replace(prefix, "");
-        // const args = message.body.split(" ").slice(1);
         
         const listCommands: {
             name: string;
@@ -16,7 +15,7 @@ const message = (client: Client): void => {
             aliases: string[] | undefined;
         }[] = [];
 
-        const commandFiles = fs.readdirSync("./src/commands");
+        const commandFiles = fs.readdirSync(process.env.TYPE! === 'development' ? "./src/commands" : './build/commands');
         for (const file of commandFiles) {
             const commandModule = await import(`../commands/${file}`);
             const commands = commandModule.default;
