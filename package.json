@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "tsc && node ./build/app.js"
+    "dev": "nodemon ./src/app.ts",
+    "build": "tsc"
   },
   "keywords": [
     "Whatsapp Bot"
